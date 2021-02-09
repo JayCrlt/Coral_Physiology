@@ -1,4 +1,4 @@
-# Calcification, respiration and photosynthesis trajectories of six prominent reef-building coral taxa :desert_island:
+# Calcification, respiration and photosynthesis trajectories of six prominent reef-building coral taxa
 ### Jeremy Carlot*, Héloïse Rouzé, Diego R. Barneche, Alexandre Mercière, Benoit Espiau, Ulisse Cardini, Simon J. Brandl, Jordan M. Casey, Gonzalo Peres-Rosales, Mehdi Adjeroud, Laetitia Hédouin and Valeriano Parravicini
 
 This project is about defining 3 main coral processes (i.e. calcification rate, net photosynthesis rate, and respiration rate) of six prominent reef-building coral taxa in Mo'orea (french Polynesia).
