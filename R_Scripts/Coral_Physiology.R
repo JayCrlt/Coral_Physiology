@@ -8,20 +8,21 @@ if (Sys.getenv("RSTUDIO") == "1" && !nzchar(Sys.getenv("RSTUDIO_TERM")) &&
     Sys.info()["sysname"] == "Darwin" && getRversion() == "4.0.0") {
   parallel:::setDefaultClusterOptions(setup_strategy = "sequential")}
 
-#############################################################################################################
-######################################## CORAL METABOLISM PRODUCTION ######################################## 
-#############################################################################################################
-
 #### FIGURE 1 ####
 # Model Calcification
-mixt_calcif = brm(bf(log_calcif ~ a*log_area+b,
-                     a ~ 1 + (1|Species), 
-                     b ~ 1 + (1|Species), 
-                     nl = TRUE), iter = 5000,
-                  data = Data_Raw_Metabo, family = gaussian(),
-                  prior = c(prior(uniform(-10,10), nlpar = "b"), prior(normal(0.8,0.2), nlpar = "a")),
-                  control = list(adapt_delta = 0.999, max_treedepth = 30), chains = 3)
+
+my_priors <- set_prior("normal(0, 5)", class = "b") +
+  set_prior("normal(0, 5)", class = "Intercept") +
+  set_prior("gamma(2, 0.1)", class = "sigma")
+mixt_calcif <- brm(log_calcif ~ log_area + (1 + log_area | Species),
+                   iter = 5000, data = Data_Raw_Metabo, family = gaussian(),
+                   control = list(adapt_delta = 0.999, max_treedepth = 30),
+                   prior = my_priors, chains = 3)
+plot(mixt_calcif) # traceplot and posterior distributions, add to online supp
+pp_check(mixt_calcif, type = "scatter_avg") # posterior_predictive check, add to online supp
+bayes_R2(mixt_calcif) # bayesian R2, add to your main figure and results section?
 CaCO3_df = cbind(fitted(mixt_calcif),mixt_calcif$data) 
+
 ## Plot the results
 Fig_1A = ggplot(CaCO3_df, aes(x = log_area, y = log_calcif, col = Species)) + 
   geom_ribbon(aes(x = log_area, ymin = Q2.5, ymax = Q97.5, fill = Species), alpha = .5, show.legend = F) + 
@@ -35,9 +36,10 @@ Fig_1A = ggplot(CaCO3_df, aes(x = log_area, y = log_calcif, col = Species)) +
   scale_y_continuous(name = expression("log(Calcification rate) (kg.yr"^-1*")")) + 
   scale_x_continuous(name = expression("log(Surface Area) (cm"^2*")")) +
   theme(legend.text = element_text(face = "italic")) 
-Fig_2A = mixt_calcif %>% spread_draws(c(b_a_Intercept,sd_Species__a_Intercept), r_Species__a[Species,]) %>%
-  mutate(condition_mean = b_a_Intercept + r_Species__a,
-         condition_sd = sd_Species__a_Intercept + r_Species__a) %>% 
+Fig_2A = mixt_calcif %>% spread_draws(c(b_log_area,sd_Species__log_area), r_Species[Species,log_area]) %>%
+  as.data.frame() %>% filter(log_area == "log_area") %>% 
+  mutate(condition_mean = b_log_area + r_Species,
+         condition_sd = sd_Species__log_area + r_Species) %>% 
   group_by(Species) %>% summarise(mean_mean = mean(condition_mean), mean_sd = sd(condition_mean)) %>%
   mutate(Species = fct_recode(Species, "A. hyacinthus" = "Acropora.hyacinthus",
                               "M. verilli" = "Montipora.verilli", "N. irregularis" = "Napopora.irregularis", 
@@ -48,9 +50,9 @@ Fig_2A = mixt_calcif %>% spread_draws(c(b_a_Intercept,sd_Species__a_Intercept), 
   geom_hline(yintercept = 1, linetype = "dashed", alpha = .5) +
   theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() + ylab("") + 
   scale_x_discrete(name = expression(beta~"coefficient of the calcification allometric model"))
-Fig_3A = mixt_calcif %>% spread_draws(c(b_b_Intercept,sd_Species__b_Intercept), r_Species__b[Species,]) %>%
-  mutate(condition_mean = b_b_Intercept + r_Species__b,
-         condition_sd = sd_Species__b_Intercept + r_Species__b) %>% 
+Fig_3A = mixt_calcif %>% spread_draws(c(b_Intercept,sd_Species__Intercept), r_Species[Species,]) %>%
+  mutate(condition_mean = b_Intercept + r_Species,
+         condition_sd = sd_Species__Intercept + r_Species) %>% 
   group_by(Species) %>% summarise(mean_mean = mean(condition_mean), mean_sd = sd(condition_mean)) %>%
   mutate(Species = fct_recode(Species, "A. hyacinthus" = "Acropora.hyacinthus",
                               "M. verilli" = "Montipora.verilli", "N. irregularis" = "Napopora.irregularis", 
