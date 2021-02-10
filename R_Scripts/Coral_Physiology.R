@@ -301,3 +301,126 @@ Right_plot = ggplot(mixt_Energy_df, aes(x = Net_Photosynthesis, y = Calcificatio
   geom_point(aes(shape = Shape), alpha = .75, show.legend = F, size = 2) +
   theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() +   scale_shape_manual(values = c(15,0,16,1,17,2)) + 
   scale_y_continuous(name = expression("Calcification")) + scale_x_continuous(name = expression("Photosynthesis")) 
+
+#### FIGURE S1 ####
+
+# Model Calcification
+Fig_4A = ggplot(CaCO3_df, aes(x = log_area, y = log(exp(log_calcif)/exp(log_area)), col = Species)) + 
+  geom_ribbon(aes(x = log_area, ymin = log(exp(Q2.5)/exp(log_area)), ymax = log(exp(Q97.5)/exp(log_area)), fill = Species), 
+              alpha = .5, show.legend = F) + 
+  theme_classic() + geom_point(alpha = .5, show.legend = F) + scale_color_viridis_d()+scale_fill_viridis_d() + 
+  facet_wrap(~Species, ncol = 6, labeller = labeller(Species = c("Acropora hyacinthus" = "A. hyacinthus", 
+                                                                 "Montipora verilli" = "M. verilli", 
+                                                                 "Napopora irregularis" = "N. irregularis", 
+                                                                 "Astrea curta" = "A. curta",
+                                                                 "Pocillopora verrucosa" = "P. verrucosa",  
+                                                                 "Porites lutea" = "P. lutea"))) +
+  scale_y_continuous(name = expression("log(Calcification std. rate) (kg.cm"^-2*"yr"^-1*")")) + 
+  scale_x_continuous(name = expression("log(Surface Area) (cm"^2*")")) +
+  theme(legend.text = element_text(face = "italic")) 
+Fig_5A = mixt_calcif %>% spread_draws(c(b_log_area,sd_Species__log_area), r_Species[Species,log_area]) %>%
+  as.data.frame() %>% filter(log_area == "log_area") %>% 
+  mutate(condition_mean = b_log_area + r_Species - 1,
+         condition_sd = sd_Species__log_area + r_Species - 1) %>% 
+  group_by(Species) %>% summarise(mean_mean = mean(condition_mean), mean_sd = sd(condition_mean)) %>%
+  mutate(Species = fct_recode(Species, "A. hyacinthus" = "Acropora.hyacinthus",
+                              "M. verilli" = "Montipora.verilli", "N. irregularis" = "Napopora.irregularis", 
+                              "A. curta" = "Astrea.curta", "P. verrucosa" = "Pocillopora.verrucosa", 
+                              "P. lutea" = "Porites.lutea")) %>% 
+  ggplot(aes(x = Species, dist = "norm", arg1 = mean_mean, arg2 = mean_sd, fill = Species)) + 
+  stat_dist_eye(position = "dodge", aes(col = Species), alpha = .7, show.legend = F) + 
+  geom_hline(yintercept = 0, linetype = "dashed", alpha = .5) +
+  theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() + ylab("") + 
+  scale_x_discrete(name = expression(beta~"coefficient of the calcification allometric model"))
+Fig_6A = data.frame(log_area = rep(0, 6), Species = unique(CaCO3_df$Species)) %>% cbind(predict(mixt_calcif, .)) %>% 
+  as.data.frame() %>% mutate(mean_mean = Estimate, mean_sd = Est.Error) %>% 
+  mutate(Species = fct_recode(Species, "A. hyacinthus" = "Acropora hyacinthus",
+                              "M. verilli" = "Montipora verilli", "N. irregularis" = "Napopora irregularis", 
+                              "A. curta" = "Astrea curta", "P. verrucosa" = "Pocillopora verrucosa", 
+                              "P. lutea" = "Porites lutea")) %>% 
+  ggplot(aes(x = Species, dist = "norm", arg1 = mean_mean, arg2 = mean_sd, fill = Species)) + 
+  stat_dist_eye(position = "dodge", aes(col = Species), alpha = .7, show.legend = F) + 
+  theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() + ylab("") + 
+  scale_x_discrete(name = expression(alpha~"coefficient of the calcification allometric model"))
+
+# Model Respiration
+Fig_4B = ggplot(respi_df, aes(x = log_area, y = log(exp(log_respi)/exp(log_area)), col = Species)) + 
+  geom_ribbon(aes(x = log_area, ymin = log(exp(Q2.5)/exp(log_area)), ymax = log(exp(Q97.5)/exp(log_area)), fill = Species), 
+              alpha = .5, show.legend = F) + 
+  theme_classic() + geom_point(alpha = .5, show.legend = F) + scale_color_viridis_d()+scale_fill_viridis_d() + 
+  facet_wrap(~Species, ncol = 6, labeller = labeller(Species = c("Acropora hyacinthus" = "A. hyacinthus", 
+                                                                 "Montipora verilli" = "M. verilli", 
+                                                                 "Napopora irregularis" = "N. irregularis", 
+                                                                 "Astrea curta" = "A. curta",
+                                                                 "Pocillopora verrucosa" = "P. verrucosa",  
+                                                                 "Porites lutea" = "P. lutea"))) +
+  scale_y_continuous(name = expression("log(Respiration rate std.) (mg.cm"^-2*"h"^-1*")")) + 
+  scale_x_continuous(name = expression("log(Surface Area) (cm"^2*")")) +
+  theme(legend.text = element_text(face = "italic")) 
+Fig_5B = mixt_respi %>% spread_draws(c(b_log_area,sd_Species__log_area), r_Species[Species,log_area]) %>%
+  as.data.frame() %>% filter(log_area == "log_area") %>% 
+  mutate(condition_mean = b_log_area + r_Species - 1,
+         condition_sd = sd_Species__log_area + r_Species - 1) %>% 
+  group_by(Species) %>% summarise(mean_mean = mean(condition_mean), mean_sd = sd(condition_mean)) %>%
+  mutate(Species = fct_recode(Species, "A. hyacinthus" = "Acropora.hyacinthus",
+                              "M. verilli" = "Montipora.verilli", "N. irregularis" = "Napopora.irregularis", 
+                              "A. curta" = "Astrea.curta", "P. verrucosa" = "Pocillopora.verrucosa", 
+                              "P. lutea" = "Porites.lutea")) %>% 
+  ggplot(aes(x = Species, dist = "norm", arg1 = mean_mean, arg2 = mean_sd, fill = Species)) + 
+  stat_dist_eye(position = "dodge", aes(col = Species), alpha = .7, show.legend = F) + 
+  geom_hline(yintercept = 0, linetype = "dashed", alpha = .5) +
+  theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() + ylab("") + 
+  scale_x_discrete(name = expression(beta~"coefficient of the respiration allometric model"))
+Fig_6B = data.frame(log_area = rep(0, 6), Species = unique(respi_df$Species)) %>% cbind(predict(mixt_respi, .)) %>% 
+  as.data.frame() %>% mutate(mean_mean = Estimate, mean_sd = Est.Error) %>% 
+  mutate(Species = fct_recode(Species, "A. hyacinthus" = "Acropora hyacinthus",
+                              "M. verilli" = "Montipora verilli", "N. irregularis" = "Napopora irregularis", 
+                              "A. curta" = "Astrea curta", "P. verrucosa" = "Pocillopora verrucosa", 
+                              "P. lutea" = "Porites lutea")) %>% 
+  ggplot(aes(x = Species, dist = "norm", arg1 = mean_mean, arg2 = mean_sd, fill = Species)) + 
+  stat_dist_eye(position = "dodge", aes(col = Species), alpha = .7, show.legend = F) + 
+  theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() + ylab("") + 
+  scale_x_discrete(name = expression(alpha~"coefficient of the respiration allometric model"))
+
+# Model Photosynthesis
+Fig_4C = ggplot(photo_df, aes(x = log_area, y = log(exp(log_photo)/exp(log_area)), col = Species)) + 
+  geom_ribbon(aes(x = log_area, ymin = log(exp(Q2.5)/exp(log_area)), ymax = log(exp(Q97.5)/exp(log_area)), fill = Species), 
+              alpha = .5, show.legend = F) + 
+  theme_classic() + geom_point(alpha = .5, show.legend = F) + scale_color_viridis_d()+scale_fill_viridis_d() + 
+  facet_wrap(~Species, ncol = 6, labeller = labeller(Species = c("Acropora hyacinthus" = "A. hyacinthus", 
+                                                                 "Montipora verilli" = "M. verilli", 
+                                                                 "Napopora irregularis" = "N. irregularis", 
+                                                                 "Astrea curta" = "A. curta",
+                                                                 "Pocillopora verrucosa" = "P. verrucosa",  
+                                                                 "Porites lutea" = "P. lutea"))) +
+  scale_y_continuous(name = expression("log(Photosynthesis rate std.) (mg.cm"^-2*"h"^-1*")")) + 
+  scale_x_continuous(name = expression("log(Surface Area) (cm"^2*")")) +
+  theme(legend.text = element_text(face = "italic")) 
+Fig_5C = mixt_photo %>% spread_draws(c(b_log_area,sd_Species__log_area), r_Species[Species,log_area]) %>%
+  as.data.frame() %>% filter(log_area == "log_area") %>% 
+  mutate(condition_mean = b_log_area + r_Species - 1,
+         condition_sd = sd_Species__log_area + r_Species - 1) %>% 
+  group_by(Species) %>% summarise(mean_mean = mean(condition_mean), mean_sd = sd(condition_mean)) %>%
+  mutate(Species = fct_recode(Species, "A. hyacinthus" = "Acropora.hyacinthus",
+                              "M. verilli" = "Montipora.verilli", "N. irregularis" = "Napopora.irregularis", 
+                              "A. curta" = "Astrea.curta", "P. verrucosa" = "Pocillopora.verrucosa", 
+                              "P. lutea" = "Porites.lutea")) %>% 
+  ggplot(aes(x = Species, dist = "norm", arg1 = mean_mean, arg2 = mean_sd, fill = Species)) + 
+  stat_dist_eye(position = "dodge", aes(col = Species), alpha = .7, show.legend = F) + 
+  geom_hline(yintercept = 0, linetype = "dashed", alpha = .5) +
+  theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() + ylab("") + 
+  scale_x_discrete(name = expression(beta~"coefficient of the photosynthesis allometric model"))
+Fig_6C = data.frame(log_area = rep(0, 6), Species = unique(photo_df$Species)) %>% cbind(predict(mixt_photo, .)) %>% 
+  as.data.frame() %>% mutate(mean_mean = Estimate, mean_sd = Est.Error) %>% 
+  mutate(Species = fct_recode(Species, "A. hyacinthus" = "Acropora hyacinthus",
+                              "M. verilli" = "Montipora verilli", "N. irregularis" = "Napopora irregularis", 
+                              "A. curta" = "Astrea curta", "P. verrucosa" = "Pocillopora verrucosa", 
+                              "P. lutea" = "Porites lutea")) %>% 
+  ggplot(aes(x = Species, dist = "norm", arg1 = mean_mean, arg2 = mean_sd, fill = Species)) + 
+  stat_dist_eye(position = "dodge", aes(col = Species), alpha = .7, show.legend = F) + 
+  theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() + ylab("") + 
+  scale_x_discrete(name = expression(alpha~"coefficient of the photosynthesis allometric model"))
+
+#Final Plot – Figure S1
+Productivity = ((Fig_4A/Fig_4B/Fig_4C) | (Fig_5A/Fig_5B/Fig_5C) | (Fig_6A/Fig_6B/Fig_6C)) + 
+  plot_layout(guides = "collect", widths = c(4, 1, 1))
