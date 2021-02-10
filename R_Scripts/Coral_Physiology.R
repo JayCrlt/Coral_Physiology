@@ -113,13 +113,13 @@ Fig_3B = mixt_respi %>% spread_draws(c(b_Intercept,sd_Species__Intercept), r_Spe
   scale_x_discrete(name = expression(alpha~"coefficient of the respiration allometric model"))
 
 # Model Photosynthesis
-mixt_photo = brm(bf(log_photo ~ a*log_area+b,
-                    a ~ 1 + (1|Species), 
-                    b ~ 1 + (1|Species), 
-                    nl = TRUE), iter = 5000,
-                 data = Data_Raw_Metabo, family = gaussian(),
-                 prior = c(prior(normal(-4,3), nlpar = "b"), prior(normal(1,0.3), nlpar = "a")),
-                 control = list(adapt_delta = 0.999, max_treedepth = 30), chains = 3)
+mixt_photo = brm(log_photo ~ log_area + (1 + log_area | Species),
+                 iter = 5000, data = Data_Raw_Metabo, family = gaussian(),
+                 control = list(adapt_delta = 0.999, max_treedepth = 35),
+                 prior = my_priors, chains = 3)
+plot(mixt_photo) # traceplot and posterior distributions, add to online supp
+pp_check(mixt_photo, type = "scatter_avg") # posterior_predictive check, add to online supp
+bayes_R2(mixt_photo) # bayesian R2, add to your main figure and results section?
 photo_df = cbind(fitted(mixt_photo),mixt_photo$data) 
 ## Plot the results
 Fig_1C = ggplot(photo_df, aes(x = log_area, y = (log_photo), col = Species)) + 
@@ -134,9 +134,10 @@ Fig_1C = ggplot(photo_df, aes(x = log_area, y = (log_photo), col = Species)) +
   scale_y_continuous(name = expression("log(Photosynthesis rate) (mg.h"^-1*")")) + 
   scale_x_continuous(name = expression("log(Surface Area) (cm"^2*")")) +
   theme(legend.text = element_text(face = "italic")) 
-Fig_2C = mixt_photo %>% spread_draws(c(b_a_Intercept,sd_Species__a_Intercept), r_Species__a[Species,]) %>%
-  mutate(condition_mean = b_a_Intercept + r_Species__a,
-         condition_sd = sd_Species__a_Intercept + r_Species__a) %>% 
+Fig_2C = mixt_photo %>% spread_draws(c(b_log_area,sd_Species__log_area), r_Species[Species,log_area]) %>%
+  as.data.frame() %>% filter(log_area == "log_area") %>% 
+  mutate(condition_mean = b_log_area + r_Species,
+         condition_sd = sd_Species__log_area + r_Species) %>% 
   group_by(Species) %>% summarise(mean_mean = mean(condition_mean), mean_sd = sd(condition_mean)) %>%
   mutate(Species = fct_recode(Species, "A. hyacinthus" = "Acropora.hyacinthus",
                               "M. verilli" = "Montipora.verilli", "N. irregularis" = "Napopora.irregularis", 
@@ -147,9 +148,9 @@ Fig_2C = mixt_photo %>% spread_draws(c(b_a_Intercept,sd_Species__a_Intercept), r
   geom_hline(yintercept = 1, linetype = "dashed", alpha = .5) +
   theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() + ylab("") + 
   scale_x_discrete(name = expression(beta~"coefficient of the Photosynthesis allometric model"))
-Fig_3C = mixt_photo %>% spread_draws(c(b_b_Intercept,sd_Species__b_Intercept), r_Species__b[Species,]) %>%
-  mutate(condition_mean = b_b_Intercept + r_Species__b,
-         condition_sd = sd_Species__b_Intercept + r_Species__b) %>% 
+Fig_3C = mixt_photo %>% spread_draws(c(b_Intercept,sd_Species__Intercept), r_Species[Species,]) %>%
+  mutate(condition_mean = b_Intercept + r_Species,
+         condition_sd = sd_Species__Intercept + r_Species) %>% 
   group_by(Species) %>% summarise(mean_mean = mean(condition_mean), mean_sd = sd(condition_mean)) %>%
   mutate(Species = fct_recode(Species, "A. hyacinthus" = "Acropora.hyacinthus",
                               "M. verilli" = "Montipora.verilli", "N. irregularis" = "Napopora.irregularis", 
@@ -165,7 +166,6 @@ Production = ((Fig_1A/Fig_1B/Fig_1C) | (Fig_2A/Fig_2B/Fig_2C) | (Fig_3A/Fig_3B/F
   plot_layout(guides = "collect", widths = c(4, 1, 1))
 ggsave(Production, filename = paste(Results_directory,"Figure_1.eps", sep = "/"), device=cairo_ps, 
        fallback_resolution = 600, width = 40, height = 25, units = "cm")
-
 
 #### FIGURE 2 ####
 
