@@ -162,10 +162,9 @@ Fig_3C = mixt_photo %>% spread_draws(c(b_Intercept,sd_Species__Intercept), r_Spe
   scale_x_discrete(name = expression(alpha~"coefficient of the photosynthesis allometric model"))
 
 #Final Plot – Figure 1
-Production = ((Fig_1A/Fig_1B/Fig_1C) | (Fig_2A/Fig_2B/Fig_2C) | (Fig_3A/Fig_3B/Fig_3C)) + 
-  plot_layout(guides = "collect", widths = c(4, 1, 1))
+Production = ((Fig_1A/Fig_1B/Fig_1C) | (Fig_2A/Fig_2B/Fig_2C)) + plot_layout(guides = "collect", widths = c(4, 1))
 ggsave(Production, filename = paste(Results_directory,"Figure_1.eps", sep = "/"), device=cairo_ps, 
-       fallback_resolution = 600, width = 40, height = 25, units = "cm")
+       fallback_resolution = 500, width = 40, height = 25, units = "cm")
 
 #### FIGURE 2 ####
 
@@ -422,5 +421,6 @@ Fig_6C = data.frame(log_area = rep(0, 6), Species = unique(photo_df$Species)) %>
   scale_x_discrete(name = expression(alpha~"coefficient of the photosynthesis allometric model"))
 
 #Final Plot – Figure S1
-Productivity = ((Fig_4A/Fig_4B/Fig_4C) | (Fig_5A/Fig_5B/Fig_5C) | (Fig_6A/Fig_6B/Fig_6C)) + 
-  plot_layout(guides = "collect", widths = c(4, 1, 1))
+Productivity = ((Fig_4A/Fig_4B/Fig_4C) | (Fig_5A/Fig_5B/Fig_5C)) + plot_layout(guides = "collect", widths = c(4, 1))
+ggsave(Productivity, filename = paste(Results_directory,"Figure_S1.eps", sep = "/"), device=cairo_ps, 
+       fallback_resolution = 500, width = 40, height = 25, units = "cm")
