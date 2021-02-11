@@ -5,10 +5,6 @@ library('tidyverse');library('brms');library('ggpubr');library('abind');library(
 library('patchwork');library('tidybayes');library('rstatix');library('drawsample');library('parallel') 
 library('cmdstanr') ; install_cmdstan(cores = 3)
 
-if (Sys.getenv("RSTUDIO") == "1" && !nzchar(Sys.getenv("RSTUDIO_TERM")) && 
-    Sys.info()["sysname"] == "Darwin" && getRversion() == "4.0.0") {
-  parallel:::setDefaultClusterOptions(setup_strategy = "sequential")}
-
 #### FIGURE 1 ####
 # Model Calcification
 
@@ -67,7 +63,7 @@ Fig_3A = mixt_calcif %>% spread_draws(c(b_Intercept,sd_Species__Intercept), r_Sp
 # Model Respiration
 mixt_respi = brm(log_respi ~ log_area + (1 + log_area | Species),
     iter = 5000, data = Data_Raw_Metabo, family = gaussian(),
-    control = list(adapt_delta = 0.999, max_treedepth = 30),
+    control = list(adapt_delta = 0.999, max_treedepth = 35),
     prior = my_priors, chains = 3, backend = "cmdstanr")
 plot(mixt_respi) # traceplot and posterior distributions, add to online supp
 pp_check(mixt_respi, type = "scatter_avg") # posterior_predictive check, add to online supp
@@ -293,7 +289,7 @@ mixt_Energy = brm(bf(Calcification ~ a*Net_Photosynthesis^b,
                     a ~ 1 + (1|Species), b ~ 1 + (1|Species), nl = TRUE), iter = 5000,
                  data = data_aggregated, family = gaussian(),
                  prior = c(prior(uniform(-10,10), nlpar = "a"), prior(normal(0.5,.5), nlpar = "b")),
-                 control = list(adapt_delta = 0.999, max_treedepth = 30), chains = 3, cores = 1)
+                 control = list(adapt_delta = 0.999, max_treedepth = 30), chains = 3, backend = "cmdstanr")
 mixt_Energy_df = cbind(fitted(mixt_Energy),mixt_Energy$data) %>% mutate(Shape = data_aggregated$Shape)
 
 Right_plot = ggplot(mixt_Energy_df, aes(x = Net_Photosynthesis, y = Calcification, col = Species)) + 
