@@ -1,8 +1,8 @@
 # SET UP THE SCRIPT
 rm(list=ls());Results_directory=paste(getwd(),"/Results",sep="");Data_directory=paste(getwd(),"/Data",sep="")
 setwd(Data_directory) ; options(mc.cores = parallel::detectCores()) ; load("data_Carlot.RData")
-library('tidyverse') ; library('parallel') ; library('brms') ; library('abind') ; library('readxl')
-library('patchwork') ; library("tidybayes") ; library('ggpubr') ; library('rstatix') ; library("drawsample")
+library('tidyverse');library('brms');library('ggpubr');library('abind');library('readxl');library('ggmcmc')
+library('patchwork');library("tidybayes");library('rstatix');library("drawsample");library('parallel') 
 
 if (Sys.getenv("RSTUDIO") == "1" && !nzchar(Sys.getenv("RSTUDIO_TERM")) && 
     Sys.info()["sysname"] == "Darwin" && getRversion() == "4.0.0") {
@@ -301,7 +301,7 @@ Right_plot = ggplot(mixt_Energy_df, aes(x = Net_Photosynthesis, y = Calcificatio
   theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() +   scale_shape_manual(values = c(15,0,16,1,17,2)) + 
   scale_y_continuous(name = expression("Calcification")) + scale_x_continuous(name = expression("Photosynthesis")) 
 
-#### FIGURE S1 ####
+#### FIGURE S2 ####
 
 # Model Calcification
 Fig_4A = ggplot(CaCO3_df, aes(x = log_area, y = log(exp(log_calcif)/exp(log_area)), col = Species)) + 
@@ -424,3 +424,40 @@ Fig_6C = data.frame(log_area = rep(0, 6), Species = unique(photo_df$Species)) %>
 Productivity = ((Fig_4A/Fig_4B/Fig_4C) | (Fig_5A/Fig_5B/Fig_5C)) + plot_layout(guides = "collect", widths = c(4, 1))
 ggsave(Productivity, filename = paste(Results_directory,"Figure_S1.eps", sep = "/"), device=cairo_ps, 
        fallback_resolution = 500, width = 40, height = 25, units = "cm")
+
+#### FIGURE S3 ####
+
+# Bayesian outputs – Calcification
+modeltranformed_calcif <- ggmcmc::ggs(mixt_calcif) %>% filter(Parameter %in% unique(modeltranformed_calcif$Parameter)[1:6]) %>% filter(Iteration >= 2500)
+C_calcif = ggplot(modeltranformed_calcif) + geom_line(aes(y = value, x = Iteration, color = as.factor(Chain))) + 
+  facet_grid(Parameter ~ ., scale  = 'free_y', switch = 'y') + theme_classic() +
+  labs(title = "Caterpillar Plots – Calcification", col   = "Chains") + fishualize::scale_colour_fish_d(option = "Chlorurus_microrhinos", end = .3)
+D_calcif = ggplot(modeltranformed_calcif) + geom_density(aes(x = value), fill = "#6600CC60") + 
+  facet_grid(Parameter ~ ., scale  = 'free', switch = 'y') + theme_classic() +
+  labs(title = "Density Plots – Calcification") 
+
+# Bayesian outputs – Respiration
+modeltranformed_respi <- ggmcmc::ggs(mixt_respi) %>% filter(Parameter %in% unique(modeltranformed_calcif$Parameter)[1:6]) %>% filter(Iteration >= 2500)
+C_respi = ggplot(modeltranformed_respi) + geom_line(aes(y = value, x = Iteration, color = as.factor(Chain))) + 
+  facet_grid(Parameter ~ ., scale  = 'free_y', switch = 'y') + theme_classic() +
+  labs(title = "Caterpillar Plots – Respiration", col   = "Chains") + fishualize::scale_colour_fish_d(option = "Chlorurus_microrhinos", end = .3)
+D_respi = ggplot(modeltranformed_respi) + geom_density(aes(x = value), fill = "#6600CC60") + 
+  facet_grid(Parameter ~ ., scale  = 'free', switch = 'y') + theme_classic() +
+  labs(title = "Density Plots – Respiration") 
+
+# Bayesian outputs – Photosynthesis
+modeltranformed_photo <- ggmcmc::ggs(mixt_photo) %>% filter(Parameter %in% unique(modeltranformed_calcif$Parameter)[1:6]) %>% filter(Iteration >= 2500)
+C_photo = ggplot(modeltranformed_photo) + geom_line(aes(y = value, x = Iteration, color = as.factor(Chain))) + 
+  facet_grid(Parameter ~ ., scale  = 'free_y', switch = 'y') + theme_classic() +
+  labs(title = "Caterpillar Plots – Photosynthesis", col   = "Chains") + fishualize::scale_colour_fish_d(option = "Chlorurus_microrhinos", end = .3)
+D_photo = ggplot(modeltranformed_photo) + geom_density(aes(x = value), fill = "#6600CC60") + 
+  facet_grid(Parameter ~ ., scale  = 'free', switch = 'y') + theme_classic() +
+  labs(title = "Density Plots – Photosynthesis") 
+
+#Final Plot – Figure S3
+Bayes_Outputs_1 = C_calcif + D_calcif + C_respi + D_respi + C_photo + D_photo + plot_layout(guides = "collect", widths = c(3,1,3,1,3,1))
+Bayes_Outputs_2 = pp_check(mixt_calcif, type = "scatter_avg") + pp_check(mixt_respi, type = "scatter_avg") + pp_check(mixt_photo, type = "scatter_avg")
+Bayes_Outputs = Bayes_Outputs_1 / Bayes_Outputs_2
+
+ggsave(Bayes_Outputs, filename = paste(Results_directory,"Figure_S3.eps", sep = "/"), device=cairo_ps, 
+       fallback_resolution = 600, width = 40, height = 25, units = "cm")
