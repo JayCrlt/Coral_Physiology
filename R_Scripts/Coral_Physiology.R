@@ -301,6 +301,9 @@ Right_plot = ggplot(mixt_Energy_df, aes(x = Net_Photosynthesis, y = Calcificatio
   theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() +   scale_shape_manual(values = c(15,0,16,1,17,2)) + 
   scale_y_continuous(name = expression("Calcification")) + scale_x_continuous(name = expression("Photosynthesis")) 
 
+#### FIGURE S1 ####
+# The figure S1 done on Keynote (macOS application)
+
 #### FIGURE S2 ####
 
 # Model Calcification
