@@ -2,7 +2,8 @@
 rm(list=ls());Results_directory=paste(getwd(),"/Results",sep="");Data_directory=paste(getwd(),"/Data",sep="")
 setwd(Data_directory) ; options(mc.cores = parallel::detectCores()) ; load("data_Carlot.RData")
 library('tidyverse');library('brms');library('ggpubr');library('abind');library('readxl');library('ggmcmc')
-library('patchwork');library("tidybayes");library('rstatix');library("drawsample");library('parallel') 
+library('patchwork');library('tidybayes');library('rstatix');library('drawsample');library('parallel') 
+library('cmdstanr') ; install_cmdstan(cores = 3)
 
 if (Sys.getenv("RSTUDIO") == "1" && !nzchar(Sys.getenv("RSTUDIO_TERM")) && 
     Sys.info()["sysname"] == "Darwin" && getRversion() == "4.0.0") {
@@ -16,8 +17,8 @@ my_priors <- set_prior("normal(0, 5)", class = "b") +
   set_prior("gamma(2, 0.1)", class = "sigma")
 mixt_calcif <- brm(log_calcif ~ log_area + (1 + log_area | Species),
                    iter = 5000, data = Data_Raw_Metabo, family = gaussian(),
-                   control = list(adapt_delta = 0.999, max_treedepth = 30),
-                   prior = my_priors, chains = 3)
+                   control = list(adapt_delta = 0.999, max_treedepth = 35),
+                   prior = my_priors, chains = 3, backend = "cmdstanr")
 plot(mixt_calcif) # traceplot and posterior distributions, add to online supp
 pp_check(mixt_calcif, type = "scatter_avg") # posterior_predictive check, add to online supp
 bayes_R2(mixt_calcif) # bayesian R2, add to your main figure and results section?
@@ -67,7 +68,7 @@ Fig_3A = mixt_calcif %>% spread_draws(c(b_Intercept,sd_Species__Intercept), r_Sp
 mixt_respi = brm(log_respi ~ log_area + (1 + log_area | Species),
     iter = 5000, data = Data_Raw_Metabo, family = gaussian(),
     control = list(adapt_delta = 0.999, max_treedepth = 30),
-    prior = my_priors, chains = 3)
+    prior = my_priors, chains = 3, backend = "cmdstanr")
 plot(mixt_respi) # traceplot and posterior distributions, add to online supp
 pp_check(mixt_respi, type = "scatter_avg") # posterior_predictive check, add to online supp
 bayes_R2(mixt_respi) # bayesian R2, add to your main figure and results section?
@@ -116,7 +117,7 @@ Fig_3B = mixt_respi %>% spread_draws(c(b_Intercept,sd_Species__Intercept), r_Spe
 mixt_photo = brm(log_photo ~ log_area + (1 + log_area | Species),
                  iter = 5000, data = Data_Raw_Metabo, family = gaussian(),
                  control = list(adapt_delta = 0.999, max_treedepth = 35),
-                 prior = my_priors, chains = 3)
+                 prior = my_priors, chains = 3, backend = "cmdstanr")
 plot(mixt_photo) # traceplot and posterior distributions, add to online supp
 pp_check(mixt_photo, type = "scatter_avg") # posterior_predictive check, add to online supp
 bayes_R2(mixt_photo) # bayesian R2, add to your main figure and results section?
