@@ -169,10 +169,10 @@ colnames(CaCO3_df) = c("Estimate", "Est.Error", "Q2.5", "Q97.5", "log_metabo_rat
 colnames(respi_df) = colnames(CaCO3_df) ; colnames(photo_df) = colnames(CaCO3_df)
 Estimates = rbind(CaCO3_df, respi_df, photo_df) %>% mutate(Metabo = rep(c("Calcification", "Respiration", "Photosynthesis"), each = 250))
 
-ggplot(Estimates, aes(x = log_area, y = (log_metabo_rate), col = Species)) + 
+Prod = ggplot(Estimates, aes(x = log_area, y = (log_metabo_rate), col = Species)) + 
   geom_ribbon(aes(x = (log_area), ymin = (Q2.5), ymax = (Q97.5), fill = Species), alpha = .5, show.legend = F) + 
   geom_point(alpha = .5, show.legend = F) + scale_color_viridis_d() + scale_fill_viridis_d() + 
-  facet_grid(Metabo~Species, labeller = labeller(Species = c("Acropora hyacinthus" = "A. hyacinthus", 
+  facet_grid(Metabo~Species, scales = "free_y", labeller = labeller(Species = c("Acropora hyacinthus" = "A. hyacinthus", 
                                                              "Montipora verilli" = "M. verilli", 
                                                              "Napopora irregularis" = "N. irregularis", 
                                                              "Astrea curta" = "A. curta",
@@ -180,6 +180,8 @@ ggplot(Estimates, aes(x = log_area, y = (log_metabo_rate), col = Species)) +
                                                              "Porites lutea" = "P. lutea"))) +
   scale_y_continuous(name = expression("log(Metabolic rate) (Prod.time"^-1*")")) + 
   scale_x_continuous(name = expression("log(Surface Area) (cm"^2*")"))
+ggsave(Prod, filename = paste(Results_directory,"Figure_1.eps", sep = "/"), device=cairo_ps, 
+       fallback_resolution = 500, width = 40, height = 20, units = "cm")
 
 #### FIGURE 2 ####
 
@@ -319,7 +321,7 @@ Right_plot = ggplot(mixt_Energy_df, aes(x = Net_Photosynthesis, y = Calcificatio
 #### FIGURE S1 ####
 # The figure S1 done on Keynote (macOS application)
 
-#### FIGURE S2 ####
+#### FIGURE S2 - Old Vizualisation ####
 
 # Model Calcification
 Fig_4A = ggplot(CaCO3_df, aes(x = log_area, y = log(exp(log_calcif)/exp(log_area)), col = Species)) + 
@@ -438,10 +440,27 @@ Fig_6C = data.frame(log_area = rep(0, 6), Species = unique(photo_df$Species)) %>
   theme_classic() + scale_color_viridis_d() + scale_fill_viridis_d() + ylab("") + 
   scale_x_discrete(name = expression(alpha~"coefficient of the photosynthesis allometric model"))
 
-#Final Plot – Figure S1
+#Final Plot – Figure S2
 Productivity = ((Fig_4A/Fig_4B/Fig_4C) | (Fig_5A/Fig_5B/Fig_5C)) + plot_layout(guides = "collect", widths = c(4, 1))
-ggsave(Productivity, filename = paste(Results_directory,"Figure_S1.eps", sep = "/"), device=cairo_ps, 
+ggsave(Productivity, filename = paste(Results_directory,"Figure_S2.eps", sep = "/"), device=cairo_ps, 
        fallback_resolution = 500, width = 40, height = 25, units = "cm")
+
+#### FIGURE S2 - New Vizualisation ####
+
+Prod_Biom = ggplot(Estimates, aes(x = log_area, y = log(exp(log_metabo_rate)/exp(log_area)), col = Species)) + 
+  geom_ribbon(aes(x = log_area, ymin = log(exp(Q2.5)/exp(log_area)), ymax = log(exp(Q97.5)/exp(log_area)), fill = Species), 
+              alpha = .5, show.legend = F) + 
+  geom_point(alpha = .5, show.legend = F) + scale_color_viridis_d() + scale_fill_viridis_d() + 
+  facet_grid(Metabo~Species, scales = "free_y", labeller = labeller(Species = c("Acropora hyacinthus" = "A. hyacinthus", 
+                                                                                "Montipora verilli" = "M. verilli", 
+                                                                                "Napopora irregularis" = "N. irregularis", 
+                                                                                "Astrea curta" = "A. curta",
+                                                                                "Pocillopora verrucosa" = "P. verrucosa",  
+                                                                                "Porites lutea" = "P. lutea"))) +
+  scale_y_continuous(name = expression("log(Photosynthesis rate std.) (Prod cm"^-2*"Time"^-1*")")) + 
+  scale_x_continuous(name = expression("log(Surface Area) (cm"^2*")"))
+ggsave(Prod_Biom, filename = paste(Results_directory,"Figure_S2.eps", sep = "/"), device=cairo_ps, 
+       fallback_resolution = 500, width = 40, height = 20, units = "cm")
 
 #### FIGURE S3 ####
 
