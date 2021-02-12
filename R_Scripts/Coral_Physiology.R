@@ -5,7 +5,7 @@ library('tidyverse');library('brms');library('ggpubr');library('abind');library(
 library('patchwork');library('tidybayes');library('rstatix');library('drawsample');library('parallel') 
 library('cmdstanr') ; install_cmdstan(cores = 3)
 
-#### FIGURE 1 ####
+#### FIGURE 1 - Old Vizualisation ####
 # Model Calcification
 
 my_priors <- set_prior("normal(0, 5)", class = "b") +
@@ -162,6 +162,24 @@ Fig_3C = mixt_photo %>% spread_draws(c(b_Intercept,sd_Species__Intercept), r_Spe
 Production = ((Fig_1A/Fig_1B/Fig_1C) | (Fig_2A/Fig_2B/Fig_2C)) + plot_layout(guides = "collect", widths = c(4, 1))
 ggsave(Production, filename = paste(Results_directory,"Figure_1.eps", sep = "/"), device=cairo_ps, 
        fallback_resolution = 500, width = 40, height = 25, units = "cm")
+
+#### FIGURE 1 - New Vizualisation ####
+
+colnames(CaCO3_df) = c("Estimate", "Est.Error", "Q2.5", "Q97.5", "log_metabo_rate", "log_area", "Species")
+colnames(respi_df) = colnames(CaCO3_df) ; colnames(photo_df) = colnames(CaCO3_df)
+Estimates = rbind(CaCO3_df, respi_df, photo_df) %>% mutate(Metabo = rep(c("Calcification", "Respiration", "Photosynthesis"), each = 250))
+
+ggplot(Estimates, aes(x = log_area, y = (log_metabo_rate), col = Species)) + 
+  geom_ribbon(aes(x = (log_area), ymin = (Q2.5), ymax = (Q97.5), fill = Species), alpha = .5, show.legend = F) + 
+  geom_point(alpha = .5, show.legend = F) + scale_color_viridis_d() + scale_fill_viridis_d() + 
+  facet_grid(Metabo~Species, labeller = labeller(Species = c("Acropora hyacinthus" = "A. hyacinthus", 
+                                                             "Montipora verilli" = "M. verilli", 
+                                                             "Napopora irregularis" = "N. irregularis", 
+                                                             "Astrea curta" = "A. curta",
+                                                             "Pocillopora verrucosa" = "P. verrucosa",  
+                                                             "Porites lutea" = "P. lutea"))) +
+  scale_y_continuous(name = expression("log(Metabolic rate) (Prod.time"^-1*")")) + 
+  scale_x_continuous(name = expression("log(Surface Area) (cm"^2*")"))
 
 #### FIGURE 2 ####
 
