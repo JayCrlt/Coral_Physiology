@@ -319,7 +319,41 @@ Right_plot = ggplot(mixt_Energy_df, aes(x = Net_Photosynthesis, y = Calcificatio
   scale_y_continuous(name = expression("Calcification")) + scale_x_continuous(name = expression("Photosynthesis")) 
 
 #### FIGURE S1 ####
-# The figure S1 done on Keynote (macOS application)
+
+# Bayesian outputs – Calcification
+modeltranformed_calcif <- ggmcmc::ggs(mixt_calcif) %>% filter(Parameter %in% unique(modeltranformed_calcif$Parameter)[1:6]) %>% filter(Iteration >= 2500)
+C_calcif = ggplot(modeltranformed_calcif) + geom_line(aes(y = value, x = Iteration, color = as.factor(Chain))) + 
+  facet_grid(Parameter ~ ., scale  = 'free_y', switch = 'y') + theme_classic() +
+  labs(title = "Caterpillar Plots – Calcification", col   = "Chains") + fishualize::scale_colour_fish_d(option = "Chlorurus_microrhinos", end = .3)
+D_calcif = ggplot(modeltranformed_calcif) + geom_density(aes(x = value), fill = "#6600CC60") + 
+  facet_grid(Parameter ~ ., scale  = 'free', switch = 'y') + theme_classic() +
+  labs(title = "Density Plots – Calcification") 
+
+# Bayesian outputs – Respiration
+modeltranformed_respi <- ggmcmc::ggs(mixt_respi) %>% filter(Parameter %in% unique(modeltranformed_calcif$Parameter)[1:6]) %>% filter(Iteration >= 2500)
+C_respi = ggplot(modeltranformed_respi) + geom_line(aes(y = value, x = Iteration, color = as.factor(Chain))) + 
+  facet_grid(Parameter ~ ., scale  = 'free_y', switch = 'y') + theme_classic() +
+  labs(title = "Caterpillar Plots – Respiration", col   = "Chains") + fishualize::scale_colour_fish_d(option = "Chlorurus_microrhinos", end = .3)
+D_respi = ggplot(modeltranformed_respi) + geom_density(aes(x = value), fill = "#6600CC60") + 
+  facet_grid(Parameter ~ ., scale  = 'free', switch = 'y') + theme_classic() +
+  labs(title = "Density Plots – Respiration") 
+
+# Bayesian outputs – Photosynthesis
+modeltranformed_photo <- ggmcmc::ggs(mixt_photo) %>% filter(Parameter %in% unique(modeltranformed_calcif$Parameter)[1:6]) %>% filter(Iteration >= 2500)
+C_photo = ggplot(modeltranformed_photo) + geom_line(aes(y = value, x = Iteration, color = as.factor(Chain))) + 
+  facet_grid(Parameter ~ ., scale  = 'free_y', switch = 'y') + theme_classic() +
+  labs(title = "Caterpillar Plots – Photosynthesis", col   = "Chains") + fishualize::scale_colour_fish_d(option = "Chlorurus_microrhinos", end = .3)
+D_photo = ggplot(modeltranformed_photo) + geom_density(aes(x = value), fill = "#6600CC60") + 
+  facet_grid(Parameter ~ ., scale  = 'free', switch = 'y') + theme_classic() +
+  labs(title = "Density Plots – Photosynthesis") 
+
+#Final Plot – Figure S1
+Bayes_Outputs_1 = C_calcif + D_calcif + C_respi + D_respi + C_photo + D_photo + plot_layout(guides = "collect", widths = c(3,1,3,1,3,1))
+Bayes_Outputs_2 = pp_check(mixt_calcif, type = "scatter_avg") + pp_check(mixt_respi, type = "scatter_avg") + pp_check(mixt_photo, type = "scatter_avg")
+Bayes_Outputs = Bayes_Outputs_1 / Bayes_Outputs_2
+
+ggsave(Bayes_Outputs, filename = paste(Results_directory,"Figure_S1.eps", sep = "/"), device=cairo_ps, 
+       fallback_resolution = 600, width = 40, height = 25, units = "cm")
 
 #### FIGURE S2 - Old Vizualisation ####
 
@@ -461,40 +495,3 @@ Prod_Biom = ggplot(Estimates, aes(x = log_area, y = log(exp(log_metabo_rate)/exp
   scale_x_continuous(name = expression("log(Surface Area) (cm"^2*")"))
 ggsave(Prod_Biom, filename = paste(Results_directory,"Figure_S2.eps", sep = "/"), device=cairo_ps, 
        fallback_resolution = 500, width = 40, height = 20, units = "cm")
-
-#### FIGURE S3 ####
-
-# Bayesian outputs – Calcification
-modeltranformed_calcif <- ggmcmc::ggs(mixt_calcif) %>% filter(Parameter %in% unique(modeltranformed_calcif$Parameter)[1:6]) %>% filter(Iteration >= 2500)
-C_calcif = ggplot(modeltranformed_calcif) + geom_line(aes(y = value, x = Iteration, color = as.factor(Chain))) + 
-  facet_grid(Parameter ~ ., scale  = 'free_y', switch = 'y') + theme_classic() +
-  labs(title = "Caterpillar Plots – Calcification", col   = "Chains") + fishualize::scale_colour_fish_d(option = "Chlorurus_microrhinos", end = .3)
-D_calcif = ggplot(modeltranformed_calcif) + geom_density(aes(x = value), fill = "#6600CC60") + 
-  facet_grid(Parameter ~ ., scale  = 'free', switch = 'y') + theme_classic() +
-  labs(title = "Density Plots – Calcification") 
-
-# Bayesian outputs – Respiration
-modeltranformed_respi <- ggmcmc::ggs(mixt_respi) %>% filter(Parameter %in% unique(modeltranformed_calcif$Parameter)[1:6]) %>% filter(Iteration >= 2500)
-C_respi = ggplot(modeltranformed_respi) + geom_line(aes(y = value, x = Iteration, color = as.factor(Chain))) + 
-  facet_grid(Parameter ~ ., scale  = 'free_y', switch = 'y') + theme_classic() +
-  labs(title = "Caterpillar Plots – Respiration", col   = "Chains") + fishualize::scale_colour_fish_d(option = "Chlorurus_microrhinos", end = .3)
-D_respi = ggplot(modeltranformed_respi) + geom_density(aes(x = value), fill = "#6600CC60") + 
-  facet_grid(Parameter ~ ., scale  = 'free', switch = 'y') + theme_classic() +
-  labs(title = "Density Plots – Respiration") 
-
-# Bayesian outputs – Photosynthesis
-modeltranformed_photo <- ggmcmc::ggs(mixt_photo) %>% filter(Parameter %in% unique(modeltranformed_calcif$Parameter)[1:6]) %>% filter(Iteration >= 2500)
-C_photo = ggplot(modeltranformed_photo) + geom_line(aes(y = value, x = Iteration, color = as.factor(Chain))) + 
-  facet_grid(Parameter ~ ., scale  = 'free_y', switch = 'y') + theme_classic() +
-  labs(title = "Caterpillar Plots – Photosynthesis", col   = "Chains") + fishualize::scale_colour_fish_d(option = "Chlorurus_microrhinos", end = .3)
-D_photo = ggplot(modeltranformed_photo) + geom_density(aes(x = value), fill = "#6600CC60") + 
-  facet_grid(Parameter ~ ., scale  = 'free', switch = 'y') + theme_classic() +
-  labs(title = "Density Plots – Photosynthesis") 
-
-#Final Plot – Figure S3
-Bayes_Outputs_1 = C_calcif + D_calcif + C_respi + D_respi + C_photo + D_photo + plot_layout(guides = "collect", widths = c(3,1,3,1,3,1))
-Bayes_Outputs_2 = pp_check(mixt_calcif, type = "scatter_avg") + pp_check(mixt_respi, type = "scatter_avg") + pp_check(mixt_photo, type = "scatter_avg")
-Bayes_Outputs = Bayes_Outputs_1 / Bayes_Outputs_2
-
-ggsave(Bayes_Outputs, filename = paste(Results_directory,"Figure_S3.eps", sep = "/"), device=cairo_ps, 
-       fallback_resolution = 600, width = 40, height = 25, units = "cm")
