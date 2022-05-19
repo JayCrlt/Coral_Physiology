@@ -7,18 +7,18 @@ Coral reefs provide a range of important services to humanity, which are underpi
 calcification, coral physiology, coral reefs, demographic dynamics, photosynthesis, respiration
 
 <u> AUTHOR CONTRIBUTION </u>\
-*Jeremy Carlot*: Data curation; Formal analysis Investigation; Validation; Visualization; Writing – original draft; Writing – review & editing\
-*Héloïse Rouzé*: Supervision; Validation; Writing – review & editing\
-*Diego R. Barneche*: Conceptualization; analysis; Validation; Writing – review & editing\
-*Alexandre Mercière*: Data curation; Investigation; Methodology; Writing – review & editing\
-*Benoit Espiau*: Data curation; Investigation; Methodology; Writing – review & editing\
-*Ulisse Cardini*: Data curation; Investigation; Methodology; Writing – review & editing\
-*Simon J. Brandl*: Resources; Writing – review & editing\
-*Jordan M. Casey*: Writing – review & editing\
-*Gonzalo Pérez-Rosales*: Writing – review & editing\
-*Mehdi Adjeroud*: Writing – review & editing\
-*Laetitia Hédouin*: Funding acquisition; Writing – review & editing\
-*Valeriano Parravicini*: Conceptualization; Funding acquisition; Resources; Supervision; Validation; Writing – review & editing
+*JC*: Data curation; Formal analysis Investigation; Validation; Visualization; Writing – original draft; Writing – review & editing\
+*HR*: Supervision; Validation; Writing – review & editing\
+*DRB*: Conceptualization; analysis; Validation; Writing – review & editing\
+*AM*: Data curation; Investigation; Methodology; Writing – review & editing\
+*BE*: Data curation; Investigation; Methodology; Writing – review & editing\
+*UC*: Data curation; Investigation; Methodology; Writing – review & editing\
+*SJB*: Resources; Writing – review & editing\
+*JMC*: Writing – review & editing\
+*GPR*: Writing – review & editing\
+*MA*: Writing – review & editing\
+*LH*: Funding acquisition; Writing – review & editing\
+*VP*: Conceptualization; Funding acquisition; Resources; Supervision; Validation; Writing – review & editing
 
 --------------
 
