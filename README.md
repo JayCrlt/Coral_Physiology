@@ -13,7 +13,6 @@ The script used for the manuscript figures could be find in the R_Scripts folder
 The second script is about the supplementary analysis.
 
 <u> AUTHOR CONTRIBUTION </u>
-
 *Jeremy Carlot*: Data curation; Formal analysis Investigation; Validation; Visualization; Writing – original draft; Writing – review & editing __
 *Héloïse Rouzé*: Supervision; Validation; Writing – review & editing __
 *Diego R. Barneche*: Conceptualization; analysis; Validation; Writing – review & editing __
